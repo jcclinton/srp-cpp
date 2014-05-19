@@ -5,28 +5,35 @@
 #include "utf8/checked.h"
 #include "Util.cpp"
 
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #define MAX_ACCOUNT_STR 16
 
-/*
-void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result)
+typedef struct AUTH_LOGON_CHALLENGE_C
 {
-    std::ostringstream ss;
-    for (uint32 i = 0; i < arrayLen; ++i)
-    {
-        for (uint8 j = 0; j < 2; ++j)
-        {
-            unsigned char nibble = 0x0F & (bytes[i] >> ((1 - j) * 4));
-            char encodedNibble;
-            if (nibble < 0x0A)
-                { encodedNibble = '0' + nibble; }
-            else
-                { encodedNibble = 'A' + nibble - 0x0A; }
-            ss << encodedNibble;
-        }
-    }
-    result = ss.str();
-}
-*/
+    uint8   cmd;
+    uint8   error;
+    uint16  size;
+    uint8   gamename[4];
+    uint8   version1;
+    uint8   version2;
+    uint8   version3;
+    uint16  build;
+    uint8   platform[4];
+    uint8   os[4];
+    uint8   country[4];
+    uint32  timezone_bias;
+    uint32  ip;
+    uint8   I_len;
+    uint8   I[5];
+} sAuthLogonChallenge_C;
+
 
 BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt)
 {
@@ -66,59 +73,6 @@ BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt
 	return x;
 }
 
-/*
-
-bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize)
-{
-    try
-    {
-        size_t len = utf8::distance(utf8str, utf8str + csize);
-        if (len > wsize)
-        {
-            if (wsize > 0)
-                { wstr[0] = L'\0'; }
-            wsize = 0;
-            return false;
-        }
-
-        wsize = len;
-        utf8::utf8to16(utf8str, utf8str + csize, wstr);
-        wstr[len] = L'\0';
-    }
-    catch (std::exception)
-    {
-        if (wsize > 0)
-            { wstr[0] = L'\0'; }
-        wsize = 0;
-        return false;
-    }
-
-    return true;
-}
-
-bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
-{
-    try
-    {
-        size_t len = utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
-        wstr.resize(len);
-
-        if (len)
-            { utf8::utf8to16(utf8str.c_str(), utf8str.c_str() + utf8str.size(), &wstr[0]); }
-    }
-    catch (std::exception)
-    {
-        wstr = L"";
-        return false;
-    }
-
-    return true;
-}
-bool Utf8toWStr(const std::string& utf8str, wchar_t* wstr, size_t& wsize)
-{
-    return Utf8toWStr(utf8str.c_str(), utf8str.size(), wstr, wsize);
-}
-*/
 
 bool normalizeString(std::string& utf8str)
 {
@@ -135,6 +89,61 @@ bool normalizeString(std::string& utf8str)
 
 int main()
 {
+	 register int sock, c, numbytes;
+    socklen_t bsize;
+    struct sockaddr_in sa;
+    struct tm *tm;
+    FILE *client;
+
+    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("socket");
+        return 1;
+    }
+
+    bzero(&sa, sizeof sa);
+
+    sa.sin_family = AF_INET;
+    sa.sin_port   = htons(3724);
+
+    if (INADDR_ANY)
+        sa.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (bind(sock, (struct sockaddr *)&sa, sizeof sa) < 0) {
+        perror("bind");
+        return 2;
+    }
+		
+
+    listen(sock, 4);
+
+		 bsize = sizeof sa;
+
+		int logon_chal_size;
+		logon_chal_size = sizeof(sAuthLogonChallenge_C);
+		std::cout << "chal size: " << logon_chal_size << std::endl;
+		sAuthLogonChallenge_C logon_chal;
+
+			if ((c = accept(sock, (struct sockaddr *)&sa, &bsize)) < 0) {
+					perror("daytimed accept");
+					return 4;
+			}
+
+
+    if ((numbytes = recv(c, &logon_chal, logon_chal_size, 0)) == -1){
+			perror("recv");
+			exit(1);
+		}
+
+			char *msg = "hello";
+			int len = strlen(msg);
+			send(c, msg, len, 0);
+
+
+				
+
+        //close(client);
+
+
 
 	BigNumber N, s, g, b, v, B, K;
 
