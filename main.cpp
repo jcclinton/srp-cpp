@@ -13,6 +13,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <ace/Get_Opt.h>
+#include <ace/Dev_Poll_Reactor.h>
+#include <ace/TP_Reactor.h>
+#include <ace/ACE.h>
+#include <ace/Acceptor.h>
+#include <ace/SOCK_Acceptor.h>
+
 #define MAX_ACCOUNT_STR 16
 
 typedef struct AUTH_LOGON_CHALLENGE_C
@@ -123,6 +130,7 @@ int main()
 		std::cout << "chal size: " << logon_chal_size << std::endl;
 		sAuthLogonChallenge_C logon_chal;
 
+			/*
 			if ((c = accept(sock, (struct sockaddr *)&sa, &bsize)) < 0) {
 					perror("daytimed accept");
 					return 4;
@@ -133,10 +141,13 @@ int main()
 			perror("recv");
 			exit(1);
 		}
+		*/
 
 			char *msg = "hello";
 			int len = strlen(msg);
-			send(c, msg, len, 0);
+			//send(c, msg, len, 0);
+
+		close(sock);
 
 
 				
