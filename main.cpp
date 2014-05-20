@@ -24,6 +24,10 @@
 
 #define MAX_ACCOUNT_STR 16
 
+void log(std::string msg)
+{
+	cout << msg << endl;
+}
 
 
 BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt)
@@ -123,6 +127,30 @@ int main()
 		*/
     ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
     ACE_Acceptor<AuthSocket, ACE_SOCK_Acceptor> acceptor;
+
+    uint16 rmport = 3724;
+    std::string bind_ip = "127.0.0.1";
+    ACE_INET_Addr bind_addr(rmport, bind_ip.c_str());
+
+    if (acceptor.open(bind_addr, ACE_Reactor::instance(), ACE_NONBLOCK) == -1)
+    {
+
+				log("error: cannot bind to port");
+        return 1;
+    }
+
+		log("starting reactor loop");
+
+		bool stopEvent = false;
+    while (!stopEvent)
+    {
+        // dont move this outside the loop, the reactor will modify it
+        ACE_Time_Value interval(0, 100000);
+
+        if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
+            { break; }
+
+    }
 		
 		/*
 		

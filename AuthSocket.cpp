@@ -9,6 +9,10 @@
 #include <ace/OS_NS_sys_stat.h>
 
 //extern DatabaseType LoginDatabase;
+void log(std::string msg)
+{
+	cout << msg << endl;
+}
 
 enum eStatus
 {
@@ -303,6 +307,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
 /// Logon Challenge command handler
 bool AuthSocket::_HandleLogonChallenge()
 {
+	log("received logon challenge");
     //DEBUG_LOG("Entering _HandleLogonChallenge");
     if (recv_len() < sizeof(sAuthLogonChallenge_C))
         { return false; }
@@ -344,6 +349,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     _login = (const char*)ch->I;
     _build = ch->build;
+		BASIC_LOG("login username: ", _login);
 
     ///- Normalize account name
     // utf8ToUpperOnlyLatin(_login); -- client already send account in expected form
@@ -519,6 +525,7 @@ bool AuthSocket::_HandleLogonChallenge()
 /// Logon Proof command handler
 bool AuthSocket::_HandleLogonProof()
 {
+	log("received logon proof");
     //DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     sAuthLogonProof_C lp;
@@ -855,6 +862,7 @@ bool AuthSocket::_HandleReconnectProof()
 /// %Realm List command handler
 bool AuthSocket::_HandleRealmList()
 {
+	log("received realmlist request");
     //DEBUG_LOG("Entering _HandleRealmList");
     if (recv_len() < 5)
         { return false; }
