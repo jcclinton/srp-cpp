@@ -9,10 +9,6 @@
 #include <ace/OS_NS_sys_stat.h>
 
 //extern DatabaseType LoginDatabase;
-void log(std::string msg)
-{
-	cout << msg << endl;
-}
 
 enum eStatus
 {
@@ -173,9 +169,15 @@ AuthSocket::AuthSocket()
 		normalizeString(password);
 
 		sha_pass_hash = CalculateShaPassHash(username, password);
+    BASIC_LOG("sha pass hash:", sha_pass_hash.c_str());
 
 		s.SetHexStr("b3d47dc40109ba25459096abdd0bfbbc3266d5b2dcf52eb586d2d2e612afdd84");
 		b.SetHexStr("74FB18F873D3044C8E8131BD68BA51B932B6D1F78362A4A3F47D9EC865D62592");
+
+		log("N", N);
+		log("g", g);
+		log("s", s);
+		log("b", b);
 
 }
 
@@ -240,6 +242,7 @@ void AuthSocket::_SetVSFields(const std::string& rI)
 
     BigNumber I;
     I.SetHexStr(rI.c_str());
+		log("pass hash", I);
 
     // In case of leading zeros in the rI hash, restore them
     uint8 mDigest[SHA_DIGEST_LENGTH];
@@ -255,7 +258,9 @@ void AuthSocket::_SetVSFields(const std::string& rI)
     sha.Finalize();
     BigNumber x;
     x.SetBinary(sha.GetDigest(), sha.GetLength());
+		log("x", x);
     v = g.ModExp(x, N);
+		log("v", v);
     // No SQL injection (username escaped)
     const char* v_hex, *s_hex;
     v_hex = v.AsHexStr();
@@ -307,7 +312,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
 /// Logon Challenge command handler
 bool AuthSocket::_HandleLogonChallenge()
 {
-	log("received logon challenge");
+	slog("received logon challenge");
     //DEBUG_LOG("Entering _HandleLogonChallenge");
     if (recv_len() < sizeof(sAuthLogonChallenge_C))
         { return false; }
@@ -461,6 +466,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     BigNumber gmod = g.ModExp(b, N);
                     B = ((v * 3) + gmod) % N;
 
+		log("B", B);
+
                     //MANGOS_ASSERT(gmod.GetNumBytes() <= 32);
 
                     BigNumber unk3;
@@ -525,7 +532,7 @@ bool AuthSocket::_HandleLogonChallenge()
 /// Logon Proof command handler
 bool AuthSocket::_HandleLogonProof()
 {
-	log("received logon proof");
+	slog("received logon proof");
     //DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     sAuthLogonProof_C lp;
@@ -602,6 +609,7 @@ bool AuthSocket::_HandleLogonProof()
     BigNumber A;
 
     A.SetBinary(lp.A, 32);
+		log("A", A);
 
     // SRP safeguard: abort if A==0
     if (A.isZero())
@@ -612,7 +620,9 @@ bool AuthSocket::_HandleLogonProof()
     sha.Finalize();
     BigNumber u;
     u.SetBinary(sha.GetDigest(), 20);
+		log("u", u);
     BigNumber S = (A * (v.ModExp(u, N))).ModExp(b, N);
+		log("S", S);
 
     uint8 t[32];
     uint8 t1[16];
@@ -641,6 +651,7 @@ bool AuthSocket::_HandleLogonProof()
         vK[i * 2 + 1] = sha.GetDigest()[i];
     }
     K.SetBinary(vK, 40);
+		log("K", K);
 
     uint8 hash[20];
 
@@ -671,10 +682,15 @@ bool AuthSocket::_HandleLogonProof()
     sha.Finalize();
     BigNumber M;
     M.SetBinary(sha.GetDigest(), 20);
+		log("M1Server", M);
 
     ///- Check if SRP6 results match (password is correct), else send an error
     if (!memcmp(M.AsByteArray(), lp.M1, 20))
     {
+			BigNumber M1Client;
+			M1Client.SetBinary(lp.M1, 20);
+			log("M1Client", M);
+
         BASIC_LOG("User '%s' successfully authenticated", _login.c_str());
 
         ///- Update the sessionkey, last_ip, last login time and reset number of failed logins in the account table for this account
@@ -687,6 +703,11 @@ bool AuthSocket::_HandleLogonProof()
         sha.Initialize();
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
+
+			BigNumber M2;
+			M2.SetBinary(sha.GetDigest(), 20);
+			log("M2", M2);
+
 
         SendProof(sha);
 
@@ -862,7 +883,7 @@ bool AuthSocket::_HandleReconnectProof()
 /// %Realm List command handler
 bool AuthSocket::_HandleRealmList()
 {
-	log("received realmlist request");
+	slog("received realmlist request");
     //DEBUG_LOG("Entering _HandleRealmList");
     if (recv_len() < 5)
         { return false; }

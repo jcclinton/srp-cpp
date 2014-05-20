@@ -18,6 +18,16 @@ void BASIC_LOG(std::string str, std::string var)
 {
 	cout << str << " with var: " << var << endl;
 }
+void log(std::string name, BigNumber B)
+{
+	std::cout << name << " hex: " << B.AsHexStr() << std::endl;
+	std::cout << name << " int: " << B.AsDecStr() << std::endl;
+}
+
+void slog(std::string msg)
+{
+	cout << msg << endl;
+}
 
 
 bool normalizeString(std::string& utf8str)
@@ -42,8 +52,13 @@ std::string CalculateShaPassHash(std::string& name, std::string& password)
     sha.UpdateData(password);
     sha.Finalize();
 
+		BigNumber D;
+    D.SetBinary(sha.GetDigest(), 20);
+		log("raw digest", D);
+
     std::string encoded;
     hexEncodeByteArray(sha.GetDigest(), sha.GetLength(), encoded);
+		BASIC_LOG("encoded digest: ", encoded);
 
     return encoded;
 }

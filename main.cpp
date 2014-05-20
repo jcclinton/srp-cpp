@@ -24,10 +24,6 @@
 
 #define MAX_ACCOUNT_STR 16
 
-void log(std::string msg)
-{
-	cout << msg << endl;
-}
 
 
 BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt)
@@ -72,59 +68,10 @@ BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt
 
 int main()
 {
-	 /*
-	 register int sock, c, numbytes;
-    socklen_t bsize;
-    struct sockaddr_in sa;
-    struct tm *tm;
-    FILE *client;
+	bool runReactor = true;
 
-    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket");
-        return 1;
-    }
-
-    bzero(&sa, sizeof sa);
-
-    sa.sin_family = AF_INET;
-    sa.sin_port   = htons(3724);
-
-    if (INADDR_ANY)
-        sa.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    if (bind(sock, (struct sockaddr *)&sa, sizeof sa) < 0) {
-        perror("bind");
-        return 2;
-    }
-		
-
-    listen(sock, 4);
-
-		 bsize = sizeof sa;
-
-		int logon_chal_size;
-		logon_chal_size = sizeof(sAuthLogonChallenge_C);
-		std::cout << "chal size: " << logon_chal_size << std::endl;
-		sAuthLogonChallenge_C logon_chal;
-
-			if ((c = accept(sock, (struct sockaddr *)&sa, &bsize)) < 0) {
-					perror("daytimed accept");
-					return 4;
-			}
-
-
-    if ((numbytes = recv(c, &logon_chal, logon_chal_size, 0)) == -1){
-			perror("recv");
-			exit(1);
-		}
-
-			char *msg = "hello";
-			int len = strlen(msg);
-			//send(c, msg, len, 0);
-
-		close(sock);
-        //close(client);
-		*/
+	if(runReactor){
+		/**/
     ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
     ACE_Acceptor<AuthSocket, ACE_SOCK_Acceptor> acceptor;
 
@@ -135,11 +82,11 @@ int main()
     if (acceptor.open(bind_addr, ACE_Reactor::instance(), ACE_NONBLOCK) == -1)
     {
 
-				log("error: cannot bind to port");
+				slog("error: cannot bind to port");
         return 1;
     }
 
-		log("starting reactor loop");
+		slog("starting reactor loop");
 
 		bool stopEvent = false;
     while (!stopEvent)
@@ -151,8 +98,9 @@ int main()
             { break; }
 
     }
+	}else{
 		
-		/*
+		/**/
 		
 		
 
@@ -162,6 +110,7 @@ int main()
 
 
 
+	/**/
 	BigNumber N, s, g, b, v, B, K;
 
 	N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
@@ -172,11 +121,7 @@ int main()
 	BigNumber gmod = g.ModExp(b, N);
 
 	std::string name = "ALICE";
-	std::string pw = "password123";
-	bool result = normalizeString(name);
-	normalizeString(pw);
-	std::cout << "norm name: " << name << std::endl;
-	std::cout << "result: " << result << std::endl;
+	std::string pw = "PASSWORD123";
 	// returns little endian x
 	BigNumber x = getDerivedKey(name, pw, s);
 
@@ -198,13 +143,13 @@ int main()
 	std::cout << "B int: " << B.AsDecStr() << std::endl;
 
 	BigNumber A;
-	A.SetHexStr("54419A67722F9FA9BA0AAE23D0BE70A028C4213D82ACEEA742D82CF3DF1ACE07");
+	A.SetHexStr("63547EDF0AB99A777D094B3BA93EC6739B3851D7CF956B7EF21BEE3846F6A3D5");
 
 	std::cout << "A hex: " << A.AsHexStr() << std::endl;
 	std::cout << "A int: " << A.AsDecStr() << std::endl;
 
 	BigNumber M1;
-	M1.SetHexStr("544CB6F78FC649DAC84D5D41D536F973DC7D787");
+	M1.SetHexStr("487AC99DB5E745D79F55CCCBCD44ED989FF2A65");
 
 
 
@@ -298,6 +243,7 @@ int main()
     sha.Initialize();
     sha.UpdateBigNumbers(&t3, NULL);
     sha.UpdateData(t4, SHA_DIGEST_LENGTH);
+    //sha.UpdateBigNumbers(&s, &A, &B, &K, NULL);
     sha.UpdateBigNumbers(&s, &A, &B, &K, NULL);
     sha.Finalize();
 
@@ -319,7 +265,8 @@ int main()
 
 	std::cout << "M2 hex: " << M2.AsHexStr() << std::endl;
 	std::cout << "M2 int: " << M2.AsDecStr() << std::endl;
-	*/
+	/**/
+	}
 
 
 }
