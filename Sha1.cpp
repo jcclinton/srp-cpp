@@ -1,3 +1,5 @@
+#ifndef _AUTH_SHA1_H
+#define _AUTH_SHA1_H
 
 #include "Sha1.h"
 #include <stdarg.h>
@@ -46,3 +48,4 @@ void Sha1Hash::Finalize(void)
 {
     SHA1_Final(mDigest, &mC);
 }
+#endif

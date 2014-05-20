@@ -1,10 +1,13 @@
+#include "Common.h"
 struct bignum_st;
 
+/*
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned long uint32;
 typedef signed long int32;
 typedef unsigned long long uint64;
+*/
 
 /**
  * @brief

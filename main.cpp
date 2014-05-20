@@ -2,8 +2,10 @@
 #include <sstream>
 #include "BigNumber.cpp"
 #include "Sha1.cpp"
-#include "utf8/checked.h"
-#include "Util.cpp"
+//#include "utf8/checked.h"
+//#include "Util.cpp"
+#include "AuthSocket.cpp"
+
 
 #include <stdio.h>
 #include <string.h>
@@ -22,24 +24,6 @@
 
 #define MAX_ACCOUNT_STR 16
 
-typedef struct AUTH_LOGON_CHALLENGE_C
-{
-    uint8   cmd;
-    uint8   error;
-    uint16  size;
-    uint8   gamename[4];
-    uint8   version1;
-    uint8   version2;
-    uint8   version3;
-    uint16  build;
-    uint8   platform[4];
-    uint8   os[4];
-    uint8   country[4];
-    uint32  timezone_bias;
-    uint32  ip;
-    uint8   I_len;
-    uint8   I[5];
-} sAuthLogonChallenge_C;
 
 
 BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt)
@@ -81,21 +65,10 @@ BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt
 }
 
 
-bool normalizeString(std::string& utf8str)
-{
-    wchar_t wstr_buf[MAX_ACCOUNT_STR + 1];
-
-    size_t wstr_len = MAX_ACCOUNT_STR;
-    if (!Utf8toWStr(utf8str, wstr_buf, wstr_len))
-        { return false; }
-
-    std::transform(&wstr_buf[0], wstr_buf + wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin);
-
-    return WStrToUtf8(wstr_buf, wstr_len, utf8str);
-}
 
 int main()
 {
+	 /*
 	 register int sock, c, numbytes;
     socklen_t bsize;
     struct sockaddr_in sa;
@@ -130,7 +103,6 @@ int main()
 		std::cout << "chal size: " << logon_chal_size << std::endl;
 		sAuthLogonChallenge_C logon_chal;
 
-			/*
 			if ((c = accept(sock, (struct sockaddr *)&sa, &bsize)) < 0) {
 					perror("daytimed accept");
 					return 4;
@@ -141,18 +113,24 @@ int main()
 			perror("recv");
 			exit(1);
 		}
-		*/
 
 			char *msg = "hello";
 			int len = strlen(msg);
 			//send(c, msg, len, 0);
 
 		close(sock);
+        //close(client);
+		*/
+    ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
+    ACE_Acceptor<AuthSocket, ACE_SOCK_Acceptor> acceptor;
+		
+		/*
+		
+		
 
 
 				
 
-        //close(client);
 
 
 
@@ -313,6 +291,7 @@ int main()
 
 	std::cout << "M2 hex: " << M2.AsHexStr() << std::endl;
 	std::cout << "M2 int: " << M2.AsDecStr() << std::endl;
+	*/
 
 
 }

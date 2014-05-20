@@ -1,3 +1,6 @@
+#ifndef _AUTH_BIGNUMBER_H
+#define _AUTH_BIGNUMBER_H
+
 #include "BigNumber.h"
 #include <openssl/bn.h>
 #include <algorithm>
@@ -174,3 +177,4 @@ const char* BigNumber::AsDecStr()
 {
     return BN_bn2dec(_bn);
 }
+#endif
