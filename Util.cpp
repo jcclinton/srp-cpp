@@ -1,10 +1,14 @@
 #include "Util.h"
-/*
+#include "MersenneTwister.h"
 
-#include <utf8.h>
+#include <ace/TSS_T.h>
 
 typedef ACE_TSS<MTRand> MTRandTSS;
 static MTRandTSS mtRand;
+
+/*
+
+#include <utf8.h>
 
 static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
 
@@ -48,6 +52,7 @@ uint32 WorldTimer::getMSTime_internal(bool savetime )
 
 //////////////////////////////////////////////////////////////////////////
 
+*/
 uint32 urand(uint32 min, uint32 max)
 {
     return mtRand->randInt(max - min) + min;
@@ -82,7 +87,6 @@ float rand_chance_f(void)
 {
     return (float)mtRand->randExc(100.0);
 }
-*/
 
 Tokens StrSplit(const std::string& src, const std::string& sep)
 {

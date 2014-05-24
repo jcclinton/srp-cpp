@@ -5,6 +5,9 @@
 //#include "utf8/checked.h"
 //#include "Util.cpp"
 #include "AuthSocket.cpp"
+#include "AuthCrypt.cpp"
+#include "WorldPacket.h"
+#include "ByteConverter.h"
 
 
 #include <stdio.h>
@@ -23,6 +26,12 @@
 #include <ace/SOCK_Acceptor.h>
 
 #define MAX_ACCOUNT_STR 16
+
+struct ServerPktHeader
+{
+    uint16 size;
+    uint16 cmd;
+};
 
 
 
@@ -68,7 +77,7 @@ BigNumber getDerivedKey(std::string& name, std::string& password, BigNumber salt
 
 int main()
 {
-	bool runReactor = true;
+	bool runReactor = false;
 
 	if(runReactor){
 		/**/
@@ -197,6 +206,44 @@ int main()
 	std::cout << "key int: " << K.AsDecStr() << std::endl;
 
 
+		AuthCrypt Crypt;
+    Crypt.SetKey(K.AsByteArray(), 40);
+    Crypt.Init();
+
+
+		ServerPktHeader header;
+		
+		uint32 Seed;
+    Seed = static_cast<uint32>(rand32());
+
+
+    uint16 SMSG_AUTH_CHALLENGE = 0x1EC;
+    WorldPacket pct(SMSG_AUTH_CHALLENGE, 4);
+    pct << Seed;
+		
+
+    header.cmd = pct.GetOpcode();
+
+    header.size = (uint16) pct.size() + 2;
+
+    EndianConvertReverse(header.size);
+    EndianConvert(header.cmd);
+
+	std::cout << "header size: " << header.size << std::endl;
+	std::cout << "header cmd: " << header.cmd << std::endl;
+
+    Crypt.EncryptSend((uint8*) & header, sizeof(header));
+
+	std::cout << "enc header size: " << header.size << std::endl;
+	std::cout << "enc header cmd: " << header.cmd << std::endl;
+
+
+	//253,158,37,23,60,41
+
+
+
+
+		/*
     uint8 hash[20];
     uint8 hash2[20];
 

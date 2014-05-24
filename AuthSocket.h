@@ -106,7 +106,7 @@ class AuthSocket: public BufferedSocket
          * @param pkt
          * @param acctid
          */
-        void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
+        void LoadRealmlist(ByteBuffer& pkt);
 
         /**
          * @brief
