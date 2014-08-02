@@ -316,4 +316,20 @@ int main()
 	}
 
 
+	ByteBuffer value;
+	
+        value << uint32(0x8d8);
+        value << uint32(0x8d7);
+        value << uint32(0x8d6);
+        value << uint32(0x8d5);
+        value << uint32(0x8d4);
+        value << uint32(0x8d3);
+
+			//std::cout << value.contents() << std::endl;
+    BigNumber v;
+    v.SetBinary(value.contents(), 20);
+	std::cout << "v hex: " << v.AsHexStr() << std::endl;
+	std::cout << "v int: " << v.AsDecStr() << std::endl;
+
+
 }

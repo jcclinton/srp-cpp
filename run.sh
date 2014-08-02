@@ -1,1 +1,1 @@
-g++ -ggdb -g -02 -lssl -lcrypto -lace main.cpp && ./a.out
+g++ -ggdb -lssl -lcrypto -lace main.cpp && ./a.out
